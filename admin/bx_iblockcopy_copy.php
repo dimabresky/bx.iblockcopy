@@ -196,6 +196,15 @@ if ($errors !== []) {
     ]);
 }
 
+if ($copyResult !== null && $copyResult->getWarnings() !== [] && !$copyResult->isSuccess()) {
+    CAdminMessage::ShowMessage([
+        'MESSAGE' => Loc::getMessage('BX_IBLOCKCOPY_WARNINGS') ?: 'Warnings',
+        'TYPE' => 'ERROR',
+        'DETAILS' => implode('<br>', array_map('htmlspecialcharsbx', $copyResult->getWarnings())),
+        'HTML' => true,
+    ]);
+}
+
 $aTabs = [
     [
         'DIV' => 'edit1',
