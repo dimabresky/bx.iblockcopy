@@ -1,0 +1,21 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+nbproject/
+
+# Composer / vendor (if added later)
+/vendor/
+composer.lock
+
+# Local env / secrets
+.env
+.env.*
+*.local.php
+
+# Logs / temp
+*.log
+/tmp/
