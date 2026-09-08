@@ -156,7 +156,8 @@ $warnings = $result->getWarnings();
 | `OnBeforePropertyCopy` | перед добавлением свойства | `FIELDS`, `SOURCE_PROPERTY` |
 | `OnAfterPropertyCopy` | после добавления свойства | `SOURCE_PROPERTY_ID`, `NEW_PROPERTY_ID` |
 
-Обработчик `OnBeforeIblockCopy` / `OnBeforePropertyCopy` может вернуть `EventResult::ERROR`, чтобы отменить операцию. В `OnBeforePropertyCopy` можно подменить `FIELDS`.
+Обработчик `OnBeforeIblockCopy` может вернуть `EventResult::ERROR`, чтобы отменить копирование целиком.  
+`OnBeforePropertyCopy` с `EventResult::ERROR` **пропускает только это свойство**; в `FIELDS` можно подменить данные перед `CIBlockProperty::Add`.
 
 ---
 
