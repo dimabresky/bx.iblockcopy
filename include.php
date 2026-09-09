@@ -8,8 +8,10 @@ use Bitrix\Main\Loader;
 use Bx\IblockCopy\CopyOptions;
 use Bx\IblockCopy\CopyPreviewBuilder;
 use Bx\IblockCopy\CopyResult;
+use Bx\IblockCopy\Copier\AdminFormSettingsCopier;
 use Bx\IblockCopy\Copier\IblockMetaCopier;
 use Bx\IblockCopy\Copier\PropertyStructureCopier;
+use Bx\IblockCopy\Copier\SectionUserFieldCopier;
 use Bx\IblockCopy\Event\Handlers;
 use Bx\IblockCopy\IblockCopyService;
 use Bx\IblockCopy\Logger;
@@ -30,6 +32,8 @@ Loader::registerAutoLoadClasses(
         Logger::class => 'lib/Logger.php',
         IblockMetaCopier::class => 'lib/Copier/IblockMetaCopier.php',
         PropertyStructureCopier::class => 'lib/Copier/PropertyStructureCopier.php',
+        SectionUserFieldCopier::class => 'lib/Copier/SectionUserFieldCopier.php',
+        AdminFormSettingsCopier::class => 'lib/Copier/AdminFormSettingsCopier.php',
         Handlers::class => 'lib/Event/Handlers.php',
     ]
 );

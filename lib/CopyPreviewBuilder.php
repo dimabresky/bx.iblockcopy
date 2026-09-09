@@ -85,6 +85,10 @@ final class CopyPreviewBuilder
             $sites = $sites !== '' && $sites !== null ? [(string)$sites] : [];
         }
 
+        $sectionUfCount = $this->countSectionUserFields($iblockId);
+        $hasElementFormSettings = $this->hasFormSettings('form_element_' . $iblockId);
+        $hasSectionFormSettings = $this->hasFormSettings('form_section_' . $iblockId);
+
         return [
             'ID' => (int)$iblock['ID'],
             'NAME' => (string)($iblock['NAME'] ?? ''),
@@ -99,7 +103,33 @@ final class CopyPreviewBuilder
             'LIST_PROPERTY_COUNT' => $listCount,
             'DIRECTORY_PROPERTY_COUNT' => $directoryCount,
             'LINK_PROPERTY_COUNT' => $linkCount,
+            'SECTION_UF_COUNT' => $sectionUfCount,
+            'HAS_ELEMENT_FORM_SETTINGS' => $hasElementFormSettings,
+            'HAS_SECTION_FORM_SETTINGS' => $hasSectionFormSettings,
             'PROPERTIES' => $properties,
         ];
+    }
+
+    private function countSectionUserFields(int $iblockId): int
+    {
+        $entityId = 'IBLOCK_' . $iblockId . '_SECTION';
+        $count = 0;
+        $iterator = \CUserTypeEntity::GetList([], ['ENTITY_ID' => $entityId]);
+        while ($iterator->Fetch()) {
+            ++$count;
+        }
+
+        return $count;
+    }
+
+    private function hasFormSettings(string $formId): bool
+    {
+        if (!class_exists(\CAdminFormSettings::class)) {
+            return false;
+        }
+
+        $tabs = \CAdminFormSettings::getTabsArray($formId);
+
+        return is_array($tabs) && $tabs !== [];
     }
 }

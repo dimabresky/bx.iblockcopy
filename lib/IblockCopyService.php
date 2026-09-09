@@ -5,11 +5,13 @@ namespace Bx\IblockCopy;
 use Bitrix\Main\Event;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\Loader;
+use Bx\IblockCopy\Copier\AdminFormSettingsCopier;
 use Bx\IblockCopy\Copier\IblockMetaCopier;
 use Bx\IblockCopy\Copier\PropertyStructureCopier;
+use Bx\IblockCopy\Copier\SectionUserFieldCopier;
 
 /**
- * Public API: copy iblock metadata and property structure.
+ * Public API: copy iblock metadata, property structure, section UF and admin forms.
  */
 final class IblockCopyService
 {
@@ -19,12 +21,20 @@ final class IblockCopyService
 
     private PropertyStructureCopier $propertyCopier;
 
+    private SectionUserFieldCopier $sectionUserFieldCopier;
+
+    private AdminFormSettingsCopier $formSettingsCopier;
+
     public function __construct(
         ?IblockMetaCopier $metaCopier = null,
-        ?PropertyStructureCopier $propertyCopier = null
+        ?PropertyStructureCopier $propertyCopier = null,
+        ?SectionUserFieldCopier $sectionUserFieldCopier = null,
+        ?AdminFormSettingsCopier $formSettingsCopier = null
     ) {
         $this->metaCopier = $metaCopier ?? new IblockMetaCopier();
         $this->propertyCopier = $propertyCopier ?? new PropertyStructureCopier();
+        $this->sectionUserFieldCopier = $sectionUserFieldCopier ?? new SectionUserFieldCopier();
+        $this->formSettingsCopier = $formSettingsCopier ?? new AdminFormSettingsCopier();
     }
 
     public function copy(CopyOptions $options): CopyResult
@@ -75,6 +85,7 @@ final class IblockCopyService
 
         $result->setNewIblockId($newId);
         $this->propertyCopier->copy($options->getSourceIblockId(), $newId, $options, $result);
+        $this->sectionUserFieldCopier->copy($options->getSourceIblockId(), $newId, $options, $result);
 
         if ($result->getErrors() !== []) {
             $this->rollbackCreatedIblock($newId, $result);
@@ -86,7 +97,7 @@ final class IblockCopyService
                 'ROLLED_BACK' => true,
             ]));
 
-            Logger::error('Iblock copy rolled back after property errors', [
+            Logger::error('Iblock copy rolled back after structure errors', [
                 'sourceId' => $options->getSourceIblockId(),
                 'rolledBackId' => $newId,
                 'errors' => $result->getErrors(),
@@ -94,6 +105,14 @@ final class IblockCopyService
 
             return $result;
         }
+
+        $this->formSettingsCopier->copy(
+            $options->getSourceIblockId(),
+            $newId,
+            $result->getPropertyMap(),
+            $options,
+            $result
+        );
 
         $result->setSuccess(true);
 
@@ -124,12 +143,12 @@ final class IblockCopyService
         if ($deleted) {
             $result->setNewIblockId(0);
             $result->addWarning(sprintf(
-                'Created iblock #%d was deleted because property structure copy failed.',
+                'Created iblock #%d was deleted because structure copy failed.',
                 $newId
             ));
         } else {
             $result->addWarning(sprintf(
-                'Property copy failed and automatic rollback of iblock #%d did not succeed; remove it manually.',
+                'Structure copy failed and automatic rollback of iblock #%d did not succeed; remove it manually.',
                 $newId
             ));
             Logger::error('Rollback delete failed', ['iblockId' => $newId]);
