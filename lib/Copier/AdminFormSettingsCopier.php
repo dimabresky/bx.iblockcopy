@@ -64,8 +64,8 @@ final class AdminFormSettingsCopier
                 return;
             }
 
-            if ($remapProperties && $propertyMap !== []) {
-                $tabs = $this->remapPropertyFields($tabs, $propertyMap);
+            if ($remapProperties) {
+                $tabs = $this->remapPropertyFields($tabs, $propertyMap, $sourceFormId, $result);
             }
 
             \CAdminFormSettings::setTabsArray($targetFormId, $tabs, true, false);
@@ -142,8 +142,13 @@ final class AdminFormSettingsCopier
      * @param array<int, int> $propertyMap
      * @return array<string, mixed>
      */
-    private function remapPropertyFields(array $tabs, array $propertyMap): array
-    {
+    private function remapPropertyFields(
+        array $tabs,
+        array $propertyMap,
+        string $sourceFormId,
+        CopyResult $result
+    ): array {
+        $dropped = [];
         $remapped = [];
         foreach ($tabs as $tabId => $tab) {
             if (!is_array($tab)) {
@@ -159,12 +164,24 @@ final class AdminFormSettingsCopier
 
             $newFields = [];
             foreach ($fields as $fieldId => $fieldName) {
-                $newFieldId = $this->remapFieldId((string)$fieldId, $propertyMap);
-                $newFields[$newFieldId] = $fieldName;
+                $resolved = $this->resolvePropertyFieldId((string)$fieldId, $propertyMap);
+                if ($resolved === null) {
+                    $dropped[] = (string)$fieldId;
+                    continue;
+                }
+                $newFields[$resolved] = $fieldName;
             }
 
             $tab['FIELDS'] = $newFields;
             $remapped[$tabId] = $tab;
+        }
+
+        if ($dropped !== []) {
+            $result->addWarning(sprintf(
+                'Form "%s": dropped unmapped property fields: %s',
+                $sourceFormId,
+                implode(', ', array_values(array_unique($dropped)))
+            ));
         }
 
         return $remapped;
@@ -172,8 +189,9 @@ final class AdminFormSettingsCopier
 
     /**
      * @param array<int, int> $propertyMap
+     * @return string|null Null when PROPERTY_* cannot be remapped and must be dropped
      */
-    private function remapFieldId(string $fieldId, array $propertyMap): string
+    private function resolvePropertyFieldId(string $fieldId, array $propertyMap): ?string
     {
         if (preg_match('/^PROPERTY_(\d+)$/', $fieldId, $matches) !== 1) {
             return $fieldId;
@@ -181,7 +199,7 @@ final class AdminFormSettingsCopier
 
         $oldId = (int)$matches[1];
         if (!isset($propertyMap[$oldId])) {
-            return $fieldId;
+            return null;
         }
 
         return 'PROPERTY_' . $propertyMap[$oldId];

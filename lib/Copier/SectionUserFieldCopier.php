@@ -75,7 +75,7 @@ final class SectionUserFieldCopier
                 continue;
             }
 
-            $fields = $this->prepareFields($field, $targetEntityId);
+            $fields = $this->prepareFields($field, $targetEntityId, $sourceIblockId, $newIblockId);
             $userType = new \CUserTypeEntity();
             $newFieldId = (int)$userType->Add($fields);
             if ($newFieldId <= 0) {
@@ -129,8 +129,12 @@ final class SectionUserFieldCopier
      * @param array<string, mixed> $field
      * @return array<string, mixed>
      */
-    private function prepareFields(array $field, string $targetEntityId): array
-    {
+    private function prepareFields(
+        array $field,
+        string $targetEntityId,
+        int $sourceIblockId,
+        int $newIblockId
+    ): array {
         $fields = $field;
         foreach (self::SKIP_FIELDS as $skip) {
             unset($fields[$skip]);
@@ -140,6 +144,13 @@ final class SectionUserFieldCopier
 
         if (!isset($fields['SETTINGS']) || !is_array($fields['SETTINGS'])) {
             $fields['SETTINGS'] = [];
+        }
+
+        if (
+            isset($fields['SETTINGS']['IBLOCK_ID'])
+            && (int)$fields['SETTINGS']['IBLOCK_ID'] === $sourceIblockId
+        ) {
+            $fields['SETTINGS']['IBLOCK_ID'] = $newIblockId;
         }
 
         foreach (['EDIT_FORM_LABEL', 'LIST_COLUMN_LABEL', 'LIST_FILTER_LABEL', 'ERROR_MESSAGE', 'HELP_MESSAGE'] as $labelKey) {
