@@ -151,6 +151,8 @@ final class SectionUserFieldCopier
             && (int)$fields['SETTINGS']['IBLOCK_ID'] === $sourceIblockId
         ) {
             $fields['SETTINGS']['IBLOCK_ID'] = $newIblockId;
+            // Elements/sections are not copied; source DEFAULT_VALUE IDs are invalid on the target.
+            unset($fields['SETTINGS']['DEFAULT_VALUE']);
         }
 
         foreach (['EDIT_FORM_LABEL', 'LIST_COLUMN_LABEL', 'LIST_FILTER_LABEL', 'ERROR_MESSAGE', 'HELP_MESSAGE'] as $labelKey) {
