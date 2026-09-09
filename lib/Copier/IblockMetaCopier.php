@@ -113,7 +113,6 @@ final class IblockMetaCopier
             $fields['DETAIL_PAGE_URL'] = (string)($source['DETAIL_PAGE_URL'] ?? '');
             $fields['SECTION_PAGE_URL'] = (string)($source['SECTION_PAGE_URL'] ?? '');
             $fields['CANONICAL_PAGE_URL'] = (string)($source['CANONICAL_PAGE_URL'] ?? '');
-            $result->addWarning('URL templates were copied as-is; check SEF conflicts on the target site.');
         }
 
         if ($options->isCopyPicture() && (int)($source['PICTURE'] ?? 0) > 0) {
