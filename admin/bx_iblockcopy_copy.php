@@ -146,6 +146,8 @@ $formDefaults = [
     'COPY_GROUP_RIGHTS' => 'Y',
     'COPY_FIELD_SETTINGS' => 'Y',
     'COPY_PROPERTIES' => 'Y',
+    'COPY_SECTION_USER_FIELDS' => 'Y',
+    'COPY_ELEMENT_FORM_SETTINGS' => 'Y',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'copy') {
@@ -271,6 +273,26 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
                 <td><?= (int)$preview['LINK_PROPERTY_COUNT'] ?></td>
             </tr>
             <tr>
+                <td><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_PREVIEW_SECTION_UF') ?: 'Section UF') ?>:</td>
+                <td><?= (int)($preview['SECTION_UF_COUNT'] ?? 0) ?></td>
+            </tr>
+            <tr>
+                <td><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_PREVIEW_ELEMENT_FORM') ?: 'Element form') ?>:</td>
+                <td>
+                    <?= !empty($preview['HAS_ELEMENT_FORM_SETTINGS'])
+                        ? htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_YES') ?: 'Y')
+                        : htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_NO') ?: 'N') ?>
+                </td>
+            </tr>
+            <tr>
+                <td><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_PREVIEW_SECTION_FORM') ?: 'Section form') ?>:</td>
+                <td>
+                    <?= !empty($preview['HAS_SECTION_FORM_SETTINGS'])
+                        ? htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_YES') ?: 'Y')
+                        : htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_NO') ?: 'N') ?>
+                </td>
+            </tr>
+            <tr>
                 <td colspan="2">
                     <p><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_DIRECTORY_NOTE') ?: '') ?></p>
                     <table class="internal" width="100%">
@@ -363,6 +385,8 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
             'COPY_GROUP_RIGHTS' => Loc::getMessage('BX_IBLOCKCOPY_COPY_RIGHTS') ?: 'Rights',
             'COPY_FIELD_SETTINGS' => Loc::getMessage('BX_IBLOCKCOPY_COPY_FIELDS') ?: 'Fields',
             'COPY_PROPERTIES' => Loc::getMessage('BX_IBLOCKCOPY_COPY_PROPERTIES') ?: 'Properties',
+            'COPY_SECTION_USER_FIELDS' => Loc::getMessage('BX_IBLOCKCOPY_COPY_SECTION_UF') ?: 'Section UF',
+            'COPY_ELEMENT_FORM_SETTINGS' => Loc::getMessage('BX_IBLOCKCOPY_COPY_FORM_SETTINGS') ?: 'Form settings',
         ];
         foreach ($checkboxes as $name => $label):
             ?>
@@ -374,6 +398,9 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
                         <?= ($formDefaults[$name] ?? 'Y') === 'Y' ? ' checked' : '' ?>>
                     <?php if ($name === 'COPY_URL_TEMPLATES'): ?>
                         <br><small><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_COPY_URL_HINT') ?: '') ?></small>
+                    <?php endif; ?>
+                    <?php if ($name === 'COPY_ELEMENT_FORM_SETTINGS'): ?>
+                        <br><small><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_COPY_FORM_HINT') ?: '') ?></small>
                     <?php endif; ?>
                 </td>
             </tr>

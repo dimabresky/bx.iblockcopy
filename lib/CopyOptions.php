@@ -36,6 +36,10 @@ final class CopyOptions
 
     private bool $copyProperties = true;
 
+    private bool $copyElementFormSettings = true;
+
+    private bool $copySectionUserFields = true;
+
     public function getSourceIblockId(): int
     {
         return $this->sourceIblockId;
@@ -210,6 +214,30 @@ final class CopyOptions
         return $this;
     }
 
+    public function isCopyElementFormSettings(): bool
+    {
+        return $this->copyElementFormSettings;
+    }
+
+    public function setCopyElementFormSettings(bool $copyElementFormSettings): self
+    {
+        $this->copyElementFormSettings = $copyElementFormSettings;
+
+        return $this;
+    }
+
+    public function isCopySectionUserFields(): bool
+    {
+        return $this->copySectionUserFields;
+    }
+
+    public function setCopySectionUserFields(bool $copySectionUserFields): self
+    {
+        $this->copySectionUserFields = $copySectionUserFields;
+
+        return $this;
+    }
+
     /**
      * @param array<string, mixed> $request
      */
@@ -234,6 +262,8 @@ final class CopyOptions
         $options->setCopyGroupRights(($request['COPY_GROUP_RIGHTS'] ?? 'Y') === 'Y');
         $options->setCopyFieldSettings(($request['COPY_FIELD_SETTINGS'] ?? 'Y') === 'Y');
         $options->setCopyProperties(($request['COPY_PROPERTIES'] ?? 'Y') === 'Y');
+        $options->setCopyElementFormSettings(($request['COPY_ELEMENT_FORM_SETTINGS'] ?? 'Y') === 'Y');
+        $options->setCopySectionUserFields(($request['COPY_SECTION_USER_FIELDS'] ?? 'Y') === 'Y');
 
         return $options;
     }
