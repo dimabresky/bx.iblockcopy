@@ -124,12 +124,8 @@ final class CopyPreviewBuilder
 
     private function hasFormSettings(string $formId): bool
     {
-        if (!class_exists(\CAdminFormSettings::class)) {
-            return false;
-        }
+        $customTabs = \CUserOptions::GetOption('form', $formId, false, 0);
 
-        $tabs = \CAdminFormSettings::getTabsArray($formId);
-
-        return is_array($tabs) && $tabs !== [];
+        return is_array($customTabs) && !empty($customTabs['tabs']);
     }
 }

@@ -10,6 +10,7 @@ use Bx\IblockCopy\Logger;
  * Copies common admin form tab settings (element + section edit forms).
  *
  * Remaps PROPERTY_{oldId} field keys using the property map from structure copy.
+ * Reads only common options (USER_ID = 0), never personal user overrides.
  */
 final class AdminFormSettingsCopier
 {
@@ -58,8 +59,8 @@ final class AdminFormSettingsCopier
         bool $remapProperties
     ): void {
         try {
-            $tabs = \CAdminFormSettings::getTabsArray($sourceFormId);
-            if (!is_array($tabs) || $tabs === []) {
+            $tabs = $this->getCommonTabsArray($sourceFormId);
+            if ($tabs === []) {
                 return;
             }
 
@@ -85,6 +86,55 @@ final class AdminFormSettingsCopier
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Loads tabs from common user options only (USER_ID = 0).
+     *
+     * Parsing mirrors \CAdminFormSettings::getTabsArray, but without personal overrides.
+     *
+     * @return array<string, array{TAB: string, FIELDS: array<string, string>}>
+     */
+    private function getCommonTabsArray(string $formId): array
+    {
+        $customTabs = \CUserOptions::GetOption('form', $formId, false, 0);
+        if (!is_array($customTabs) || empty($customTabs['tabs'])) {
+            return [];
+        }
+
+        $arCustomTabs = [];
+        $arTabs = explode('--;--', (string)$customTabs['tabs']);
+        foreach ($arTabs as $customFields) {
+            if ($customFields === '') {
+                continue;
+            }
+
+            $arCustomFields = explode('--,--', $customFields);
+            $arCustomTabID = '';
+            foreach ($arCustomFields as $customField) {
+                if ($arCustomTabID === '') {
+                    [$arCustomTabID, $arCustomTabName] = array_pad(
+                        explode('--#--', $customField, 2),
+                        2,
+                        ''
+                    );
+                    $arCustomTabs[$arCustomTabID] = [
+                        'TAB' => $arCustomTabName,
+                        'FIELDS' => [],
+                    ];
+                } else {
+                    [$arCustomFieldID, $arCustomFieldName] = array_pad(
+                        explode('--#--', $customField, 2),
+                        2,
+                        ''
+                    );
+                    $arCustomFieldName = ltrim($arCustomFieldName, "* -\xa0\xc2");
+                    $arCustomTabs[$arCustomTabID]['FIELDS'][$arCustomFieldID] = $arCustomFieldName;
+                }
+            }
+        }
+
+        return $arCustomTabs;
     }
 
     /**
