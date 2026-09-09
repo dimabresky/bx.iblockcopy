@@ -340,7 +340,7 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
         </tr>
         <tr>
             <td><label for="API_CODE"><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_TARGET_API_CODE') ?: 'API_CODE') ?>:</label></td>
-            <td><input type="text" name="API_CODE" id="API_CODE" size="50" value="<?= htmlspecialcharsbx((string)$formDefaults['API_CODE']) ?>"></td>
+            <td><input type="text" name="API_CODE" id="API_CODE" size="50" maxlength="50" value="<?= htmlspecialcharsbx((string)$formDefaults['API_CODE']) ?>"></td>
         </tr>
         <tr>
             <td><label for="XML_ID"><?= htmlspecialcharsbx(Loc::getMessage('BX_IBLOCKCOPY_TARGET_XML_ID') ?: 'XML_ID') ?>:</label></td>

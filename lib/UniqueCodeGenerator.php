@@ -6,10 +6,14 @@ use Bitrix\Main\Loader;
 
 /**
  * Generates unique CODE / API_CODE / XML_ID for a new iblock.
+ *
+ * API_CODE rules (Bitrix): 1–50 Latin letters/digits, must start with a letter.
  */
 final class UniqueCodeGenerator
 {
     private const MAX_ATTEMPTS = 50;
+
+    private const API_CODE_MAX_LENGTH = 50;
 
     public function suggestCode(string $base, string $field = 'CODE'): string
     {
@@ -18,19 +22,24 @@ final class UniqueCodeGenerator
             $base = $field === 'API_CODE' ? 'IblockCopy' : 'iblock_copy';
         }
 
-        $candidate = $base . ($field === 'API_CODE' ? 'Copy' : '_copy');
+        $suffix = $field === 'API_CODE' ? 'Copy' : '_copy';
+        $candidate = $this->withSuffix($base, $suffix, $field);
         if (!$this->exists($candidate, $field)) {
             return $candidate;
         }
 
         for ($i = 2; $i <= self::MAX_ATTEMPTS; ++$i) {
-            $next = $candidate . $i;
+            $next = $this->withSuffix($base, $suffix . $i, $field);
             if (!$this->exists($next, $field)) {
                 return $next;
             }
         }
 
-        return $candidate . '_' . time();
+        $fallbackSuffix = $field === 'API_CODE'
+            ? 'C' . substr((string)time(), -8)
+            : '_' . time();
+
+        return $this->withSuffix($base, $fallbackSuffix, $field);
     }
 
     public function ensureUnique(string $value, string $field): string
@@ -79,9 +88,14 @@ final class UniqueCodeGenerator
     {
         $value = trim($value);
         if ($field === 'API_CODE') {
-            $value = preg_replace('/[^A-Za-z0-9_]/', '', $value) ?? '';
+            // Strip non-alphanumeric (including underscores from CODE-like bases).
+            $value = preg_replace('/[^A-Za-z0-9]/', '', $value) ?? '';
             if ($value !== '' && preg_match('/^[0-9]/', $value)) {
                 $value = 'A' . $value;
+            }
+
+            if (strlen($value) > self::API_CODE_MAX_LENGTH) {
+                $value = substr($value, 0, self::API_CODE_MAX_LENGTH);
             }
 
             return $value;
@@ -90,5 +104,33 @@ final class UniqueCodeGenerator
         $value = preg_replace('/[^A-Za-z0-9_\-.]/', '_', $value) ?? '';
 
         return trim($value, '_');
+    }
+
+    private function withSuffix(string $base, string $suffix, string $field): string
+    {
+        if ($field !== 'API_CODE') {
+            return $base . $suffix;
+        }
+
+        $suffix = preg_replace('/[^A-Za-z0-9]/', '', $suffix) ?? '';
+        if ($suffix === '') {
+            $suffix = 'Copy';
+        }
+
+        $maxBaseLength = self::API_CODE_MAX_LENGTH - strlen($suffix);
+        if ($maxBaseLength < 1) {
+            return substr($suffix, 0, self::API_CODE_MAX_LENGTH);
+        }
+
+        if (strlen($base) > $maxBaseLength) {
+            $base = substr($base, 0, $maxBaseLength);
+        }
+
+        $result = $base . $suffix;
+        if ($result !== '' && preg_match('/^[0-9]/', $result)) {
+            $result = 'A' . substr($result, 0, self::API_CODE_MAX_LENGTH - 1);
+        }
+
+        return $result;
     }
 }
