@@ -44,7 +44,7 @@ final class IblockCopyService
             return $result;
         }
 
-        $source = CIBlock::GetArrayByID($options->getSourceIblockId());
+        $source = \CIBlock::GetArrayByID($options->getSourceIblockId());
         if (!is_array($source) || (int)($source['ID'] ?? 0) <= 0) {
             $result->addError('Source iblock was not found.');
 

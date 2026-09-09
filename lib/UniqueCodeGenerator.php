@@ -53,7 +53,7 @@ final class UniqueCodeGenerator
             return false;
         }
 
-        $row = CIBlockType::GetByID($typeId)->Fetch();
+        $row = \CIBlockType::GetByID($typeId)->Fetch();
 
         return is_array($row);
     }
@@ -70,7 +70,7 @@ final class UniqueCodeGenerator
             default => '=CODE',
         };
 
-        $row = CIBlock::GetList([], [$filterField => $value], false)->Fetch();
+        $row = \CIBlock::GetList([], [$filterField => $value], false)->Fetch();
 
         return is_array($row);
     }

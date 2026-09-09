@@ -18,7 +18,7 @@ final class CopyPreviewBuilder
             return null;
         }
 
-        $iblock = CIBlock::GetArrayByID($iblockId);
+        $iblock = \CIBlock::GetArrayByID($iblockId);
         if (!is_array($iblock) || (int)($iblock['ID'] ?? 0) <= 0) {
             return null;
         }
@@ -28,7 +28,7 @@ final class CopyPreviewBuilder
         $directoryCount = 0;
         $linkCount = 0;
 
-        $propertyIterator = CIBlockProperty::GetList(
+        $propertyIterator = \CIBlockProperty::GetList(
             ['SORT' => 'ASC', 'ID' => 'ASC'],
             ['IBLOCK_ID' => $iblockId]
         );
@@ -36,7 +36,7 @@ final class CopyPreviewBuilder
             $propertyId = (int)$property['ID'];
             $enumCount = 0;
             if (($property['PROPERTY_TYPE'] ?? '') === 'L') {
-                $enumIterator = CIBlockPropertyEnum::GetList(
+                $enumIterator = \CIBlockPropertyEnum::GetList(
                     ['SORT' => 'ASC', 'ID' => 'ASC'],
                     ['PROPERTY_ID' => $propertyId]
                 );

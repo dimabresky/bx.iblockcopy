@@ -30,7 +30,7 @@ final class IblockMetaCopier
         }
 
         $sourceId = $options->getSourceIblockId();
-        $source = CIBlock::GetArrayByID($sourceId);
+        $source = \CIBlock::GetArrayByID($sourceId);
         if (!is_array($source) || (int)($source['ID'] ?? 0) <= 0) {
             $result->addError('Source iblock was not found.');
 
@@ -117,7 +117,7 @@ final class IblockMetaCopier
         }
 
         if ($options->isCopyPicture() && (int)($source['PICTURE'] ?? 0) > 0) {
-            $picture = CFile::MakeFileArray((int)$source['PICTURE']);
+            $picture = \CFile::MakeFileArray((int)$source['PICTURE']);
             if (is_array($picture)) {
                 $fields['PICTURE'] = $picture;
             }
@@ -137,7 +137,7 @@ final class IblockMetaCopier
             }
         }
 
-        $iblock = new CIBlock();
+        $iblock = new \CIBlock();
         $newId = (int)$iblock->Add($fields);
         if ($newId <= 0) {
             $error = (string)($iblock->LAST_ERROR ?: 'Failed to create iblock.');
@@ -180,8 +180,8 @@ final class IblockMetaCopier
             return $source['GROUP_ID'];
         }
 
-        if (method_exists(CIBlock::class, 'GetGroupPermissions')) {
-            $permissions = CIBlock::GetGroupPermissions($sourceId);
+        if (method_exists(\CIBlock::class, 'GetGroupPermissions')) {
+            $permissions = \CIBlock::GetGroupPermissions($sourceId);
             if (is_array($permissions)) {
                 return $permissions;
             }
@@ -224,18 +224,18 @@ final class IblockMetaCopier
 
     private function copyFieldSettings(int $sourceId, int $newId, CopyResult $result): void
     {
-        if (!method_exists(CIBlock::class, 'GetFields') || !method_exists(CIBlock::class, 'SetFields')) {
+        if (!method_exists(\CIBlock::class, 'GetFields') || !method_exists(\CIBlock::class, 'SetFields')) {
             $result->addWarning('CIBlock::GetFields/SetFields are unavailable; field settings were skipped.');
 
             return;
         }
 
-        $fields = CIBlock::GetFields($sourceId);
+        $fields = \CIBlock::GetFields($sourceId);
         if (!is_array($fields) || $fields === []) {
             return;
         }
 
-        CIBlock::SetFields($newId, $fields);
+        \CIBlock::SetFields($newId, $fields);
     }
 
     private function copyExtendedRights(int $sourceId, int $newId, CopyResult $result): void

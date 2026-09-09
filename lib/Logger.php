@@ -17,7 +17,7 @@ final class Logger
     public static function error(string $message, array $context = []): void
     {
         self::write('ERROR', $message, $context);
-        AddMessage2Log('[bx.iblockcopy] ' . $message . self::formatContext($context), self::MODULE_ID);
+        \AddMessage2Log('[bx.iblockcopy] ' . $message . self::formatContext($context), self::MODULE_ID);
     }
 
     /**
