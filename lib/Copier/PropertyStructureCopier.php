@@ -44,7 +44,7 @@ final class PropertyStructureCopier
         $propertyMap = [];
         $enumMap = [];
 
-        $iterator = CIBlockProperty::GetList(
+        $iterator = \CIBlockProperty::GetList(
             ['SORT' => 'ASC', 'ID' => 'ASC'],
             ['IBLOCK_ID' => $sourceIblockId]
         );
@@ -82,7 +82,7 @@ final class PropertyStructureCopier
                 unset($fields['DEFAULT_VALUE']);
             }
 
-            $propertyObject = new CIBlockProperty();
+            $propertyObject = new \CIBlockProperty();
             $newPropertyId = (int)$propertyObject->Add($fields);
             if ($newPropertyId <= 0) {
                 $error = (string)($propertyObject->LAST_ERROR ?: 'unknown error');
@@ -109,7 +109,7 @@ final class PropertyStructureCopier
                 }
 
                 if ($defaultEnumId !== null && isset($propertyEnumMap[$defaultEnumId])) {
-                    $update = new CIBlockProperty();
+                    $update = new \CIBlockProperty();
                     $update->Update($newPropertyId, [
                         'DEFAULT_VALUE' => $propertyEnumMap[$defaultEnumId],
                     ]);
@@ -184,12 +184,12 @@ final class PropertyStructureCopier
     private function copyEnums(int $oldPropertyId, int $newPropertyId, CopyResult $result): array
     {
         $map = [];
-        $iterator = CIBlockPropertyEnum::GetList(
+        $iterator = \CIBlockPropertyEnum::GetList(
             ['SORT' => 'ASC', 'ID' => 'ASC'],
             ['PROPERTY_ID' => $oldPropertyId]
         );
 
-        $enumObject = new CIBlockPropertyEnum();
+        $enumObject = new \CIBlockPropertyEnum();
         while ($enum = $iterator->Fetch()) {
             $oldEnumId = (int)$enum['ID'];
             $newEnumId = (int)$enumObject->Add([
