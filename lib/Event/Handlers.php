@@ -24,7 +24,7 @@ final class Handlers
         Loc::loadMessages(__FILE__);
 
         $aModuleMenu[] = [
-            'parent_menu' => 'global_menu_content',
+            'parent_menu' => 'global_menu_services',
             'section' => 'bx_iblockcopy',
             'sort' => 500,
             'text' => Loc::getMessage('BX_IBLOCKCOPY_MENU_TEXT') ?: 'Iblock copy',
