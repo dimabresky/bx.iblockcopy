@@ -36,7 +36,8 @@ final class AdminFormSettingsCopier
             'form_element_' . $newIblockId,
             $propertyMap,
             $result,
-            true
+            true,
+            false
         );
 
         $this->copyForm(
@@ -44,7 +45,8 @@ final class AdminFormSettingsCopier
             'form_section_' . $newIblockId,
             $propertyMap,
             $result,
-            false
+            false,
+            !$options->isCopySectionUserFields()
         );
     }
 
@@ -56,7 +58,8 @@ final class AdminFormSettingsCopier
         string $targetFormId,
         array $propertyMap,
         CopyResult $result,
-        bool $remapProperties
+        bool $remapProperties,
+        bool $dropUserFields
     ): void {
         try {
             $tabs = $this->getCommonTabsArray($sourceFormId);
@@ -66,6 +69,10 @@ final class AdminFormSettingsCopier
 
             if ($remapProperties) {
                 $tabs = $this->remapPropertyFields($tabs, $propertyMap, $sourceFormId, $result);
+            }
+
+            if ($dropUserFields) {
+                $tabs = $this->dropUserFields($tabs, $sourceFormId, $result);
             }
 
             \CAdminFormSettings::setTabsArray($targetFormId, $tabs, true, false);
@@ -185,6 +192,44 @@ final class AdminFormSettingsCopier
         }
 
         return $remapped;
+    }
+
+    /**
+     * @param array<string, mixed> $tabs
+     * @return array<string, mixed>
+     */
+    private function dropUserFields(array $tabs, string $sourceFormId, CopyResult $result): array
+    {
+        $dropped = [];
+        $cleaned = [];
+        foreach ($tabs as $tabId => $tab) {
+            if (!is_array($tab) || !isset($tab['FIELDS']) || !is_array($tab['FIELDS'])) {
+                $cleaned[$tabId] = $tab;
+                continue;
+            }
+
+            $newFields = [];
+            foreach ($tab['FIELDS'] as $fieldId => $fieldName) {
+                if (str_starts_with((string)$fieldId, 'UF_')) {
+                    $dropped[] = (string)$fieldId;
+                    continue;
+                }
+                $newFields[$fieldId] = $fieldName;
+            }
+
+            $tab['FIELDS'] = $newFields;
+            $cleaned[$tabId] = $tab;
+        }
+
+        if ($dropped !== []) {
+            $result->addWarning(sprintf(
+                'Form "%s": dropped UF fields because section user fields were not copied: %s',
+                $sourceFormId,
+                implode(', ', array_values(array_unique($dropped)))
+            ));
+        }
+
+        return $cleaned;
     }
 
     /**
